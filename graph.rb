@@ -1,33 +1,53 @@
 class Graph
   def initialize
+    @possible_ways = {}
+    @path = []
     @vertices = {}
-    @unvisited = []
+    @visited = {}
   end
 
   def add_vertex(node, edges)
     @vertices[node] = edges
+    @visited[node] = false
   end
 
   def shortest_path(start, finish)
-    if validate_nodes
-      path = []
+    if validate_nodes start, finish
+      @visited[start] = true
       current = start
-      path << start
+
+      @path << start
 
       while current != finish
-        next_node = @vertices[current].sort{|a,b| a[1] <=> b[1]}.first[0]
-        path << next_node
+
+        @vertices[current].each do |node, value|
+          unless @visited[node]
+            @possible_ways[node] = value
+          end 
+        end
+
+        next_node = get_smallest_vertex
+
+        @path << next_node
         current = next_node
+        @visited[current] = true
+        @possible_ways = {}
       end
 
-      puts path.inspect
+      @path.join(" => ")
+    else
+      return nil
     end
   end
 
   private
 
-  def validate_nodes (node, other_node)
-    @vertices.has_key?(node) && @vertices.has_key?(other_node)
+  def get_smallest_vertex 
+    @possible_ways.sort{|a,b| a[1] <=> b[1]}.first[0]
+  end
+
+  def validate_nodes (start, finish)
+    @vertices.has_key?(start) && @vertices.has_key?(finish)
   end
 
 end
